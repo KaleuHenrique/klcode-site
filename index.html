@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Kaléu Henrique | Soluções Digitais - Sites e soluções web."
+    />
+    <title>Kaléu Henrique | Soluções Digitais</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="theme.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="cabecalho">
+      <a class="logo" href="#inicio"><span class="nome-logo">Kaléu Henrique<span>.</span></span><small>Soluções Digitais</small></a>
+      <nav aria-label="Navegação principal">
+        <a href="#servicos">Serviços</a>
+        <a href="#sobre">Sobre</a>
+        <a href="#contato">Contato</a>
+      </nav>
+      <div class="acoes-cabecalho">
+        <button class="botao-tema" id="alternar-tema" type="button"><span class="icone-tema" aria-hidden="true">☾</span></button>
+        <button class="botao-carrinho" id="abrir-carrinho" type="button" aria-label="Abrir orçamento">
+          Orçamento <span id="contador-carrinho">0</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="inicio">
+        <div>
+          <p class="sobretitulo">DESENVOLVIMENTO WEB</p>
+          <h1>Sites que dão vida às suas ideias.</h1>
+          <p class="texto-hero">Crio experiências digitais simples, rápidas e feitas para conectar o seu negócio às pessoas certas.</p>
+          <a class="botao-principal" href="#servicos">Conhecer serviços <span>→</span></a>
+        </div>
+        <div class="cartao-hero" aria-hidden="true">
+          <div class="cartao-interior">
+            <div class="face-cartao frente-cartao">
+              <p>Seu próximo projeto</p>
+              <div class="linhas-codigo">
+                <i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <strong>feito sob medida.</strong>
+            </div>
+            <div class="face-cartao verso-cartao">
+              <p>UMA IDEIA PODE SER</p>
+              <strong>o começo de algo incrível.</strong>
+              <span>Kaléu Henrique | Soluções Digitais</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="secao" id="servicos">
+        <div class="titulo-secao">
+          <div>
+            <p class="sobretitulo">O QUE POSSO CRIAR</p>
+            <h2>Serviços</h2>
+          </div>
+          <p>Escolha os serviços que fazem sentido para seu projeto e envie uma solicitação de orçamento.</p>
+        </div>
+        <div class="grade-servicos" id="lista-servicos"></div>
+      </section>
+
+      <section class="secao sobre" id="sobre">
+        <p class="sobretitulo">SOBRE MIM</p>
+        <h2>Desenvolvimento com cuidado em cada detalhe.</h2>
+        <p>Sou Kaléu Henrique. Meu objetivo é transformar necessidades reais em soluções digitais claras, bonitas e fáceis de usar.</p>
+      </section>
+
+      <section class="contato" id="contato">
+        <div>
+          <p class="sobretitulo">VAMOS CONVERSAR?</p>
+          <h2>Tem um projeto em mente?</h2>
+        </div>
+        <div class="contato-acoes">
+          <a class="botao-principal claro" href="mailto:seuemail@exemplo.com">Enviar e-mail <span>→</span></a>
+          <div class="redes-sociais" aria-label="Redes sociais">
+            <a href="https://www.instagram.com/kaleu_hr?igsh=ZHZtZnN1aGV5aXd4" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <img src="Instagram.png" alt="Instagram">
+            </a>
+            <a href="https://www.linkedin.com/in/kaléu-henrique-1b9611180?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              <img src="LinkedIn.png" alt="LinkedIn">
+            </a>
+            <a href="https://github.com/KaleuHenrique" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+              <img src="GitHub.png" alt="GitHub">
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>© <span id="ano"></span> Kaléu Henrique | Soluções Digitais.</footer>
+
+    <aside class="painel-carrinho" id="painel-carrinho" aria-label="Seu orçamento" aria-hidden="true">
+      <div class="topo-painel">
+        <div><p class="sobretitulo">SEU PROJETO</p><h2>Orçamento</h2></div>
+        <button class="fechar" id="fechar-carrinho" type="button" aria-label="Fechar orçamento">×</button>
+      </div>
+      <div class="itens-carrinho" id="itens-carrinho"></div>
+      <div class="rodape-painel">
+        <p>Total estimado <strong id="total-carrinho">R$ 0</strong></p>
+        <button class="botao-principal" id="finalizar-orcamento" type="button">Solicitar orçamento <span>→</span></button>
+      </div>
+    </aside>
+    <div class="fundo-painel" id="fundo-painel"></div>
+
+    <dialog id="modal-contato">
+      <button class="fechar fechar-modal" type="button" aria-label="Fechar formulário">×</button>
+        <p class="sobretitulo">QUASE LÁ</p>
+        <h2>Conte um pouco sobre seu projeto.</h2>
+        <p class="resumo-selecao">Serviços selecionados:<br /><strong id="resumo-servicos"></strong></p>
+      <form
+        id="formulario-orcamento"
+        name="solicitar-orcamento"
+        method="POST"
+        action="https://api.web3forms.com/submit"
+      >
+        <input type="hidden" name="access_key" value="d0fe997b-9d32-4197-9b60-f5ec12827cc8" />
+        <input type="hidden" name="subject" value="Novo pedido de orçamento - Kaléu Henrique | Soluções Digitais" />
+        <input type="hidden" name="from_name" value="Site Kaléu Henrique | Soluções Digitais" />
+        <input type="hidden" name="detalhes_do_orcamento" id="servicos-escolhidos" />
+        <input type="hidden" name="valor_estimado" id="valor-estimado" />
+        <p class="campo-antispam">
+          <label>Não preencha este campo: <input type="checkbox" name="botcheck" /></label>
+        </p>
+        <label>Nome<input type="text" name="nome" required /></label>
+        <label>E-mail<input type="email" name="email" required /></label>
+        <label>Mensagem<textarea name="mensagem" rows="4" placeholder="Descreva o que você precisa."></textarea></label>
+        <button class="botao-principal" type="submit">Enviar solicitação <span>→</span></button>
+      </form>
+      <p class="mensagem-sucesso" id="mensagem-sucesso"></p>
+    </dialog>
+
+    <script src="script.js"></script>
+  </body>
+</html>
