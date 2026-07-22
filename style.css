@@ -1,36 +1,46 @@
 /* ==================== Variáveis e estilos globais ==================== */
 :root {
+  /* Paleta padrão usada no tema claro. */
   color-scheme: light;
-  --escuro: #101828;
-  --azul: #315cf5;
-  --claro: #f4f6fb;
-  --texto: #4e5b70;
-  --borda: #e3e7ef;
+  --escuro: #171717;
+  --amarelo: #f6c515;
+  --amarelo-claro: #ffe48a;
+  --amarelo-escuro: #6b5200;
+  --claro: #fff8df;
+  --texto: #515151;
+  --borda: #e5dcc4;
   --superficie: #fff;
-  --painel-forte: #101828;
+  --painel-forte: #171717;
   --texto-em-painel: #fff;
-  --sombra-cartao: #cfd7fb;
-  --sombra-flutuante: #15234b15;
-  --fundo-sobreposto: #0a102080;
+  --texto-em-destaque: #171717;
+  --sombra-cartao: #e8be35;
+  --sombra-flutuante: #3d2f081f;
+  --fundo-sobreposto: #17171780;
 }
 
 :root[data-theme="escuro"] {
+  /* Sobrescreve a paleta quando o atributo data-theme for "escuro". */
   color-scheme: dark;
-  --escuro: #f2f5ff;
-  --azul: #86a0ff;
-  --claro: #0c1423;
-  --texto: #bdc8dc;
-  --borda: #293750;
-  --superficie: #131d2e;
-  --painel-forte: #1b2940;
+  --escuro: #f8f8f8;
+  --amarelo: #ffd54a;
+  --amarelo-claro: #ffe891;
+  --amarelo-escuro: #171717;
+  --claro: #1a1a1a;
+  --texto: #d0d0d0;
+  --borda: #404040;
+  --superficie: #101010;
+  --painel-forte: #242424;
   --texto-em-painel: #fff;
-  --sombra-cartao: #263b6a;
-  --sombra-flutuante: #0000003d;
-  --fundo-sobreposto: #020611b8;
+  --texto-em-destaque: #171717;
+  --sombra-cartao: #755c09;
+  --sombra-flutuante: #00000066;
+  --fundo-sobreposto: #000000b8;
 }
 
+/* Faz largura e altura incluírem bordas e preenchimentos. */
 * { box-sizing: border-box; }
 
+/* Ativa a navegação suave pelos links internos da página. */
 html { scroll-behavior: smooth; }
 
 body {
@@ -40,6 +50,7 @@ body {
   font-family: "DM Sans", sans-serif;
 }
 
+/* Remove a margem superior padrão dos textos para um espaçamento controlado. */
 h1, h2, p { margin-top: 0; }
 
 h1, h2, .logo { font-family: "Space Grotesk", sans-serif; }
@@ -49,12 +60,13 @@ h2 {
   letter-spacing: -0.07rem;
 }
 
+/* Faz botões herdarem a fonte e exibirem o cursor de ação. */
 button { font: inherit; cursor: pointer; }
 
 button, a { -webkit-tap-highlight-color: transparent; }
 
 .sobretitulo {
-  color: var(--azul);
+  color: var(--amarelo);
   font-size: 0.73rem;
   font-weight: 700;
   letter-spacing: 0.11rem;
@@ -62,14 +74,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 /* ==================== Componentes reutilizáveis ==================== */
 .botao-principal {
+  /* Botão-base reutilizado em chamadas para ação e no formulário. */
   display: inline-flex;
   justify-content: center;
   gap: 20px;
   padding: 15px 20px;
   border: 0;
   border-radius: 4px;
-  background: var(--azul);
-  color: var(--texto-em-painel);
+  background: var(--amarelo);
+  color: var(--texto-em-destaque);
   text-decoration: none;
   font-weight: 700;
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
@@ -82,7 +95,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .botao-principal:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 18px #1d43c24d;
+  box-shadow: 0 8px 18px #8d6d0c4d;
 }
 
 .botao-principal:active {
@@ -92,6 +105,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 /* ==================== Cabeçalho ==================== */
 .cabecalho {
+  /* Mantém os elementos do cabeçalho alinhados e limitados à largura do site. */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -119,11 +133,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-weight: 700;
 }
 
-.nome-logo span { color: var(--azul); }
+.nome-logo span { color: var(--amarelo); }
 
 .logo small {
   margin-top: 4px;
-  color: var(--azul);
+  color: var(--amarelo);
   font-family: "DM Sans", sans-serif;
   font-size: 0.55rem;
   font-weight: 700;
@@ -142,7 +156,7 @@ nav a {
   font-size: 0.94rem;
 }
 
-nav a:hover { color: var(--azul); }
+nav a:hover { color: var(--amarelo); }
 
 .botao-carrinho {
   padding: 10px 14px 10px 17px;
@@ -153,7 +167,7 @@ nav a:hover { color: var(--azul); }
   transition: transform 0.18s ease, background 0.18s ease;
 }
 
-.botao-carrinho:hover { transform: translateY(-2px); background: var(--azul); }
+.botao-carrinho:hover { transform: translateY(-2px); background: var(--amarelo); color: var(--texto-em-destaque); }
 .botao-carrinho:active { transform: translateY(1px) scale(0.97); }
 
 .botao-tema {
@@ -187,6 +201,7 @@ nav a:hover { color: var(--azul); }
 
 /* ==================== Seção principal ==================== */
 .hero {
+  /* Organiza a introdução em duas colunas: texto e cartão animado. */
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   align-items: center;
@@ -232,6 +247,7 @@ nav a:hover { color: var(--azul); }
 }
 
 .cartao-interior {
+  /* Elemento 3D que recebe a animação de rotação contínua. */
   position: relative;
   width: 100%;
   min-height: 310px;
@@ -270,7 +286,8 @@ nav a:hover { color: var(--azul); }
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: var(--azul);
+  background: var(--amarelo);
+  color: var(--texto-em-destaque);
   transform: rotateY(180deg) translateZ(1px);
   -webkit-transform: rotateY(180deg) translateZ(1px);
   animation: visibilidade-verso 12s linear infinite;
@@ -289,15 +306,15 @@ nav a:hover { color: var(--azul); }
 .linhas-codigo i {
   height: 9px;
   border-radius: 20px;
-  background: #4f6ff5;
+  background: var(--amarelo);
   transform-origin: left;
   animation: pulsar-linha 2.5s ease-in-out infinite;
 }
 
-.linhas-codigo i:nth-child(2) { width: 70%; background: #93a7ff; animation-delay: 0.2s; }
+.linhas-codigo i:nth-child(2) { width: 70%; background: var(--amarelo-claro); animation-delay: 0.2s; }
 .linhas-codigo i:nth-child(3) { width: 85%; background: var(--texto-em-painel); animation-delay: 0.4s; }
 .linhas-codigo i:nth-child(4) { width: 45%; animation-delay: 0.6s; }
-.linhas-codigo i:nth-child(5) { width: 64%; background: #93a7ff; animation-delay: 0.8s; }
+.linhas-codigo i:nth-child(5) { width: 64%; background: var(--amarelo-claro); animation-delay: 0.8s; }
 
 /* ==================== Seções e serviços ==================== */
 .secao {
@@ -323,12 +340,14 @@ nav a:hover { color: var(--azul); }
 }
 
 .grade-servicos {
+  /* Grade de três colunas para os cartões criados pelo JavaScript. */
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 18px;
 }
 
 .servico {
+  /* Cartão individual de cada serviço disponível. */
   display: flex;
   flex-direction: column;
   min-height: 270px;
@@ -344,7 +363,7 @@ nav a:hover { color: var(--azul); }
 }
 
 .icone {
-  color: var(--azul);
+  color: var(--amarelo);
   font-size: 1.45rem;
 }
 
@@ -397,16 +416,17 @@ nav a:hover { color: var(--azul); }
 }
 
 .contato {
+  /* Faixa de destaque com informações e ações de contato. */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 25px;
   padding: 64px max(28px, calc((100vw - 1124px) / 2));
-  background: var(--azul);
-  color: var(--texto-em-painel);
+  background: var(--amarelo);
+  color: var(--texto-em-destaque);
 }
 
-.contato .sobretitulo { color: #cdd7ff; }
+.contato .sobretitulo { color: var(--amarelo-escuro); }
 .contato h2 { margin: 0; }
 .claro { background: var(--superficie); color: var(--escuro); }
 
@@ -457,6 +477,7 @@ footer {
 
 /* ==================== Páginas de status do pagamento ==================== */
 .pagina-status {
+  /* Centraliza o cartão de confirmação ou de erro do pagamento. */
   display: grid;
   place-items: center;
   min-height: calc(100vh - 76px);
@@ -499,12 +520,17 @@ footer {
   font-weight: 700;
 }
 
-.sucesso .icone-status { background: #198754; }
-.erro .icone-status { background: #c12626; }
-.erro .sobretitulo { color: #c12626; }
+.sucesso .icone-status,
+.erro .icone-status {
+  background: var(--amarelo);
+  color: var(--texto-em-destaque);
+}
+
+.erro .sobretitulo { color: var(--amarelo); }
 
 /* ==================== Painel de orçamento ==================== */
 .fundo-painel {
+  /* Sobreposição que bloqueia a página enquanto o painel está aberto. */
   position: fixed;
   inset: 0;
   background: var(--fundo-sobreposto);
@@ -514,6 +540,7 @@ footer {
 }
 
 .painel-carrinho {
+  /* Painel lateral que entra pela direita da tela. */
   position: fixed;
   z-index: 2;
   top: 0;
@@ -562,7 +589,7 @@ footer {
   padding: 0;
   border: 0;
   background: none;
-  color: #c12626;
+  color: var(--amarelo);
 }
 
 .vazio { color: var(--texto); }
@@ -586,6 +613,7 @@ footer {
 
 /* ==================== Modal e formulário ==================== */
 dialog {
+  /* Janela modal usada para solicitar os dados do orçamento. */
   width: min(540px, calc(100% - 32px));
   padding: 34px;
   border: 0;
@@ -631,6 +659,7 @@ input, textarea {
 textarea { resize: vertical; }
 
 .campo-antispam {
+  /* Mantém o campo anti-spam acessível ao formulário, porém invisível ao visitante. */
   position: absolute;
   width: 1px;
   height: 1px;
@@ -643,24 +672,27 @@ textarea { resize: vertical; }
 
 .mensagem-sucesso {
   margin: 15px 0 0;
-  color: #16713b;
+  color: var(--amarelo);
   font-weight: 700;
 }
 
 /* ==================== Textos animados pela rolagem ==================== */
 .revelar-scroll {
+  /* Estado inicial dos elementos animados antes de entrarem na tela. */
   opacity: 0;
   transform: translateY(30px);
   transition: opacity 0.72s ease, transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .revelar-scroll.visivel {
+  /* Estado aplicado pelo JavaScript enquanto o elemento estiver visível. */
   opacity: 1;
   transform: translateY(0);
 }
 
 /* ==================== Animações ==================== */
 @keyframes entrada-abertura {
+  /* Entrada gradual dos elementos da primeira seção. */
   from {
     opacity: 0;
     transform: translateY(32px);
@@ -672,6 +704,7 @@ textarea { resize: vertical; }
 }
 
 @keyframes girar-cartao {
+  /* Sequência de rotação do cartão tridimensional. */
   0%, 28% {
     transform: translateY(0) rotateX(7deg) rotateY(-8deg) rotateZ(3deg);
   }
@@ -687,6 +720,7 @@ textarea { resize: vertical; }
 }
 
 @keyframes pulsar-linha {
+  /* Pulso decorativo das linhas que simulam código. */
   0%, 100% { transform: scaleX(1); opacity: 1; }
   50% { transform: scaleX(0.82); opacity: 0.65; }
 }
@@ -711,6 +745,7 @@ textarea { resize: vertical; }
 
 /* ==================== Responsividade ==================== */
 @media (max-width: 720px) {
+  /* Ajustes para telas de celular e tablets menores. */
   .cabecalho { padding: 0 20px; }
   nav { display: none; }
 
@@ -749,12 +784,14 @@ textarea { resize: vertical; }
 }
 
 @media (max-width: 380px) {
+  /* Compacta o cartão para telas muito estreitas. */
   .cartao-hero, .cartao-interior { min-height: 260px; }
   .face-cartao { padding: 24px; }
   .linhas-codigo { margin: 28px 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Respeita visitantes que optaram por reduzir movimentos no sistema. */
   *, *::before, *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;

@@ -1,3 +1,4 @@
+// Catálogo exibido na seção de serviços.
 const servicos = [
   { id: 1, icone: "◈", nome: "Site institucional", descricao: "Um site profissional para apresentar sua empresa, serviços e contatos.", preco: 0 },
   { id: 2, icone: "▣", nome: "Landing page", descricao: "Página objetiva para campanhas, divulgação de produtos ou captação de clientes.", preco: 0 },
@@ -7,34 +8,72 @@ const servicos = [
   { id: 6, icone: "?", nome: "Projeto personalizado", descricao: "Tem uma ideia diferente? Vamos desenhar a solução ideal para ela.", preco: 0 }
 ];
 
+// Recupera o orçamento salvo localmente, ou inicia uma lista vazia.
 let carrinho = JSON.parse(localStorage.getItem("orcamentoKaleu")) || [];
-const dinheiro = valor => valor ? valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "Sob consulta";
+
+// Converte valores numéricos para moeda brasileira; preço zero é sob consulta.
+const dinheiro = valor => valor
+  ? valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+  : "Sob consulta";
+
+// Referências aos elementos usados em mais de uma interação.
 const listaServicos = document.querySelector("#lista-servicos");
 const painel = document.querySelector("#painel-carrinho");
 const fundo = document.querySelector("#fundo-painel");
 const modal = document.querySelector("#modal-contato");
 
+// Cria os cartões de serviço a partir da lista acima.
 function mostrarServicos() {
   listaServicos.innerHTML = servicos.map(servico => `
     <article class="servico">
-      <span class="icone">${servico.icone}</span><h3>${servico.nome}</h3><p>${servico.descricao}</p>
-      <div class="preco"><span>${servico.preco ? "A partir de " + dinheiro(servico.preco) : dinheiro(0)}</span><button class="adicionar" data-id="${servico.id}" type="button">Adicionar</button></div>
-    </article>`).join("");
+      <span class="icone">${servico.icone}</span>
+      <h3>${servico.nome}</h3>
+      <p>${servico.descricao}</p>
+      <div class="preco">
+        <span>${servico.preco ? "A partir de " + dinheiro(servico.preco) : dinheiro(0)}</span>
+        <button class="adicionar" data-id="${servico.id}" type="button">Adicionar</button>
+      </div>
+    </article>
+  `).join("");
 }
 
+// Salva o orçamento e atualiza o painel, contador e total exibidos.
 function atualizarCarrinho() {
   localStorage.setItem("orcamentoKaleu", JSON.stringify(carrinho));
   document.querySelector("#contador-carrinho").textContent = carrinho.length;
+
   const itens = document.querySelector("#itens-carrinho");
-  itens.innerHTML = carrinho.length ? carrinho.map((item, indice) => `<div class="item-carrinho"><div><strong>${item.nome}</strong><br><small>${dinheiro(item.preco)}</small></div><button data-remover="${indice}" type="button">Remover</button></div>`).join("") : '<p class="vazio">Nenhum serviço adicionado ainda.</p>';
+  itens.innerHTML = carrinho.length
+    ? carrinho.map((item, indice) => `
+      <div class="item-carrinho">
+        <div>
+          <strong>${item.nome}</strong><br>
+          <small>${dinheiro(item.preco)}</small>
+        </div>
+        <button data-remover="${indice}" type="button">Remover</button>
+      </div>
+    `).join("")
+    : '<p class="vazio">Nenhum serviço adicionado ainda.</p>';
+
   const total = carrinho.reduce((soma, item) => soma + item.preco, 0);
   document.querySelector("#total-carrinho").textContent = dinheiro(total);
   document.querySelector("#finalizar-orcamento").disabled = !carrinho.length;
 }
 
-function abrirCarrinho() { painel.classList.add("aberto"); fundo.classList.add("visivel"); painel.setAttribute("aria-hidden", "false"); }
-function fecharCarrinho() { painel.classList.remove("aberto"); fundo.classList.remove("visivel"); painel.setAttribute("aria-hidden", "true"); }
+// Abre e fecha o painel lateral de orçamento, atualizando sua acessibilidade.
+function abrirCarrinho() {
+  painel.classList.add("aberto");
+  fundo.classList.add("visivel");
+  painel.setAttribute("aria-hidden", "false");
+}
 
+function fecharCarrinho() {
+  painel.classList.remove("aberto");
+  fundo.classList.remove("visivel");
+  painel.setAttribute("aria-hidden", "true");
+}
+
+// Preenche os campos enviados pelo formulário com o resumo do orçamento.
 function prepararFormularioOrcamento() {
   const listaDeServicos = carrinho
     .map(item => `${item.nome} (${dinheiro(item.preco)})`)
@@ -46,29 +85,45 @@ function prepararFormularioOrcamento() {
   document.querySelector("#valor-estimado").value = dinheiro(total);
 }
 
+// Adiciona um serviço quando o botão de seu cartão é clicado.
 listaServicos.addEventListener("click", evento => {
   const id = Number(evento.target.dataset.id);
   if (!id) return;
+
   const servico = servicos.find(item => item.id === id);
   carrinho.push(servico);
-  atualizarCarrinho(); abrirCarrinho();
+  atualizarCarrinho();
+  abrirCarrinho();
 });
+
+// Remove o item correspondente ao botão acionado no painel.
 document.querySelector("#itens-carrinho").addEventListener("click", evento => {
   const indice = evento.target.dataset.remover;
   if (indice === undefined) return;
-  carrinho.splice(Number(indice), 1); atualizarCarrinho();
+
+  carrinho.splice(Number(indice), 1);
+  atualizarCarrinho();
 });
+
+// Controles de abertura e fechamento do orçamento.
 document.querySelector("#abrir-carrinho").addEventListener("click", abrirCarrinho);
 document.querySelector("#fechar-carrinho").addEventListener("click", fecharCarrinho);
 fundo.addEventListener("click", fecharCarrinho);
+
+// Exibe o formulário somente com ao menos um serviço selecionado.
 document.querySelector("#finalizar-orcamento").addEventListener("click", () => {
   prepararFormularioOrcamento();
   fecharCarrinho();
   modal.showModal();
 });
+
+// Fecha o formulário quando o botão de fechar é acionado.
 document.querySelector(".fechar-modal").addEventListener("click", () => modal.close());
+
+// Envia os dados do formulário ao serviço configurado no atributo action.
 document.querySelector("#formulario-orcamento").addEventListener("submit", async evento => {
   evento.preventDefault();
+
   const formulario = evento.currentTarget;
   const nome = new FormData(formulario).get("nome");
   const mensagem = document.querySelector("#mensagem-sucesso");
@@ -83,8 +138,8 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(new FormData(formulario)).toString()
     });
-
     const resultado = await resposta.json();
+
     if (!resposta.ok || !resultado.success) throw new Error("Falha no envio");
 
     mensagem.textContent = `Obrigado, ${nome}! Recebi sua solicitação e retornarei em breve.`;
@@ -98,9 +153,15 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
     botao.innerHTML = "Enviar solicitação <span>→</span>";
   }
 });
-document.querySelector("#ano").textContent = new Date().getFullYear();
-mostrarServicos(); atualizarCarrinho();
 
+// Atualiza o ano mostrado no rodapé.
+document.querySelector("#ano").textContent = new Date().getFullYear();
+
+// Renderiza os dados iniciais do site.
+mostrarServicos();
+atualizarCarrinho();
+
+// Seleciona os elementos que devem aparecer gradualmente durante a rolagem.
 const candidatosParaAnimacao = document.querySelectorAll(`
   .hero .sobretitulo, .hero h1, .texto-hero, .hero .botao-principal,
   .titulo-secao .sobretitulo, .titulo-secao h2, .titulo-secao > p,
@@ -109,46 +170,41 @@ const candidatosParaAnimacao = document.querySelectorAll(`
   .servico
 `);
 
-const textosAnimados = [...candidatosParaAnimacao].filter(texto => {
-  return texto.getBoundingClientRect().top >= window.innerHeight;
-});
+// Apenas elementos inicialmente abaixo da tela precisam começar ocultos.
+const textosAnimados = [...candidatosParaAnimacao].filter(texto => (
+  texto.getBoundingClientRect().top >= window.innerHeight
+));
 
 textosAnimados.forEach(texto => texto.classList.add("revelar-scroll"));
 
-let ultimaPosicaoRolagem = window.scrollY;
-let direcaoRolagem = "descendo";
+// Impede múltiplas atualizações de animação no mesmo quadro de renderização.
 let animacaoPendente = false;
 
-function animarTextosNaRolagem(inicial = false) {
-  const deslocamento = window.scrollY - ultimaPosicaoRolagem;
-  if (!inicial && Math.abs(deslocamento) > 12) {
-    direcaoRolagem = deslocamento > 0 ? "descendo" : "subindo";
-  }
-
-  const descendo = inicial || direcaoRolagem === "descendo";
-  const estaNoFimDaPagina = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 24;
+// Controla a entrada e saída dos textos conforme a posição deles na janela.
+function animarTextosNaRolagem() {
   const limiteDeEntrada = window.innerHeight * 0.84;
 
   textosAnimados.forEach(texto => {
     const posicao = texto.getBoundingClientRect();
     const estaNaTela = posicao.top < limiteDeEntrada && posicao.bottom > 0;
+    const estaForaDaTela = posicao.bottom <= 0 || posicao.top >= window.innerHeight;
 
-    if (descendo && estaNaTela) texto.classList.add("visivel");
-
-    if (!descendo && !estaNoFimDaPagina && posicao.top > 0 && posicao.top < window.innerHeight) {
-      texto.classList.remove("visivel");
-    }
+    // O elemento fica visível enquanto houver qualquer parte dele na tela.
+    if (estaNaTela) texto.classList.add("visivel");
+    if (estaForaDaTela) texto.classList.remove("visivel");
   });
 
-  ultimaPosicaoRolagem = window.scrollY;
   animacaoPendente = false;
 }
 
+// Executa a animação com requestAnimationFrame para preservar o desempenho.
 window.addEventListener("scroll", () => {
   if (animacaoPendente) return;
+
   animacaoPendente = true;
-  requestAnimationFrame(() => animarTextosNaRolagem());
+  requestAnimationFrame(animarTextosNaRolagem);
 }, { passive: true });
 
-window.addEventListener("resize", () => animarTextosNaRolagem(true));
-animarTextosNaRolagem(true);
+// Recalcula a posição dos elementos quando o tamanho da janela mudar.
+window.addEventListener("resize", animarTextosNaRolagem);
+animarTextosNaRolagem();
