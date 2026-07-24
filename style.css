@@ -558,6 +558,18 @@ footer {
 .painel-carrinho.aberto { transform: none; }
 .fundo-painel.visivel { opacity: 1; pointer-events: auto; }
 
+.fundo-modal {
+  position: fixed;
+  z-index: 3;
+  inset: 0;
+  background: var(--fundo-sobreposto);
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s;
+}
+
+.fundo-modal.visivel { opacity: 1; pointer-events: auto; }
+
 .topo-painel {
   display: flex;
   justify-content: space-between;
@@ -614,14 +626,19 @@ footer {
 /* ==================== Modal e formulário ==================== */
 dialog {
   /* Janela modal usada para solicitar os dados do orçamento. */
+  position: fixed;
+  z-index: 4;
+  inset: 50% auto auto 50%;
   width: min(540px, calc(100% - 32px));
+  max-height: calc(100vh - 32px);
+  margin: 0;
   padding: 34px;
   border: 0;
   border-radius: 10px;
   box-shadow: 0 20px 55px var(--sombra-flutuante);
+  overflow: auto;
+  transform: translate(-50%, -50%);
 }
-
-dialog::backdrop { background: var(--fundo-sobreposto); }
 
 .fechar-modal {
   position: absolute;

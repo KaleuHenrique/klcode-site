@@ -35,6 +35,9 @@ const listaServicos = document.querySelector("#lista-servicos");
 const painel = document.querySelector("#painel-carrinho");
 const fundo = document.querySelector("#fundo-painel");
 const modal = document.querySelector("#modal-contato");
+const fundoModal = document.querySelector("#fundo-modal");
+const botaoFecharModal = document.querySelector(".fechar-modal");
+const botaoFinalizarOrcamento = document.querySelector("#finalizar-orcamento");
 
 // Cria os cartões de serviço a partir da lista acima.
 function mostrarServicos() {
@@ -126,6 +129,21 @@ function fecharCarrinho() {
   painel.setAttribute("aria-hidden", "true");
 }
 
+// Usa um diálogo não modal para que o desafio do hCaptcha possa ficar acima do formulário.
+function abrirModal() {
+  modal.show();
+  fundoModal.classList.add("visivel");
+  modal.setAttribute("aria-hidden", "false");
+  botaoFecharModal.focus();
+}
+
+function fecharModal() {
+  modal.close();
+  fundoModal.classList.remove("visivel");
+  modal.setAttribute("aria-hidden", "true");
+  botaoFinalizarOrcamento.focus();
+}
+
 // Preenche os campos enviados pelo formulário com o resumo do orçamento.
 function prepararFormularioOrcamento() {
   const listaDeServicos = carrinho
@@ -164,14 +182,21 @@ document.querySelector("#fechar-carrinho").addEventListener("click", fecharCarri
 fundo.addEventListener("click", fecharCarrinho);
 
 // Exibe o formulário somente com ao menos um serviço selecionado.
-document.querySelector("#finalizar-orcamento").addEventListener("click", () => {
+botaoFinalizarOrcamento.addEventListener("click", () => {
   prepararFormularioOrcamento();
   fecharCarrinho();
-  modal.showModal();
+  abrirModal();
 });
 
 // Fecha o formulário quando o botão de fechar é acionado.
-document.querySelector(".fechar-modal").addEventListener("click", () => modal.close());
+botaoFecharModal.addEventListener("click", fecharModal);
+fundoModal.addEventListener("click", fecharModal);
+modal.addEventListener("keydown", evento => {
+  if (evento.key !== "Escape") return;
+
+  evento.preventDefault();
+  fecharModal();
+});
 
 // Envia os dados do formulário ao serviço configurado no atributo action.
 document.querySelector("#formulario-orcamento").addEventListener("submit", async evento => {
