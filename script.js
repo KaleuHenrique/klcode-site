@@ -8,8 +8,22 @@ const servicos = [
   { id: 6, icone: "?", nome: "Projeto personalizado", descricao: "Tem uma ideia diferente? Vamos desenhar a solução ideal para ela.", preco: 0 }
 ];
 
-// Recupera o orçamento salvo localmente, ou inicia uma lista vazia.
-let carrinho = JSON.parse(localStorage.getItem("orcamentoKaleu")) || [];
+// Recupera somente IDs conhecidos. Dados do localStorage podem ser alterados pelo visitante.
+function lerCarrinho() {
+  try {
+    const salvo = JSON.parse(localStorage.getItem("orcamentoKaleu"));
+
+    if (!Array.isArray(salvo)) return [];
+
+    return salvo
+      .map(item => servicos.find(servico => servico.id === Number(item?.id)))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+let carrinho = lerCarrinho();
 
 // Converte valores numéricos para moeda brasileira; preço zero é sob consulta.
 const dinheiro = valor => valor
@@ -24,36 +38,75 @@ const modal = document.querySelector("#modal-contato");
 
 // Cria os cartões de serviço a partir da lista acima.
 function mostrarServicos() {
-  listaServicos.innerHTML = servicos.map(servico => `
-    <article class="servico">
-      <span class="icone">${servico.icone}</span>
-      <h3>${servico.nome}</h3>
-      <p>${servico.descricao}</p>
-      <div class="preco">
-        <span>${servico.preco ? "A partir de " + dinheiro(servico.preco) : dinheiro(0)}</span>
-        <button class="adicionar" data-id="${servico.id}" type="button">Adicionar</button>
-      </div>
-    </article>
-  `).join("");
+  const fragmento = document.createDocumentFragment();
+
+  servicos.forEach(servico => {
+    const cartao = document.createElement("article");
+    cartao.className = "servico";
+    const icone = document.createElement("span");
+    icone.className = "icone";
+    icone.textContent = servico.icone;
+    const titulo = document.createElement("h3");
+    titulo.textContent = servico.nome;
+    const descricao = document.createElement("p");
+    descricao.textContent = servico.descricao;
+    const preco = document.createElement("div");
+    preco.className = "preco";
+    const valor = document.createElement("span");
+    valor.textContent = servico.preco ? `A partir de ${dinheiro(servico.preco)}` : dinheiro(0);
+    const botao = document.createElement("button");
+    botao.className = "adicionar";
+    botao.type = "button";
+    botao.dataset.id = String(servico.id);
+    botao.textContent = "Adicionar";
+
+    preco.append(valor, botao);
+    cartao.append(icone, titulo, descricao, preco);
+    fragmento.append(cartao);
+  });
+
+  listaServicos.replaceChildren(fragmento);
 }
 
 // Salva o orçamento e atualiza o painel, contador e total exibidos.
 function atualizarCarrinho() {
-  localStorage.setItem("orcamentoKaleu", JSON.stringify(carrinho));
+  try {
+    localStorage.setItem("orcamentoKaleu", JSON.stringify(carrinho));
+  } catch {
+    // O orçamento continua disponível nesta visita quando o armazenamento falhar.
+  }
   document.querySelector("#contador-carrinho").textContent = carrinho.length;
 
   const itens = document.querySelector("#itens-carrinho");
-  itens.innerHTML = carrinho.length
-    ? carrinho.map((item, indice) => `
-      <div class="item-carrinho">
-        <div>
-          <strong>${item.nome}</strong><br>
-          <small>${dinheiro(item.preco)}</small>
-        </div>
-        <button data-remover="${indice}" type="button">Remover</button>
-      </div>
-    `).join("")
-    : '<p class="vazio">Nenhum serviço adicionado ainda.</p>';
+  const fragmento = document.createDocumentFragment();
+
+  if (carrinho.length) {
+    carrinho.forEach((item, indice) => {
+      const linha = document.createElement("div");
+      linha.className = "item-carrinho";
+      const detalhes = document.createElement("div");
+      const nome = document.createElement("strong");
+      nome.textContent = item.nome;
+      const quebra = document.createElement("br");
+      const valor = document.createElement("small");
+      valor.textContent = dinheiro(item.preco);
+      const remover = document.createElement("button");
+      remover.type = "button";
+      remover.dataset.remover = String(indice);
+      remover.textContent = "Remover";
+
+      detalhes.append(nome, quebra, valor);
+      linha.append(detalhes, remover);
+      fragmento.append(linha);
+    });
+  } else {
+    const vazio = document.createElement("p");
+    vazio.className = "vazio";
+    vazio.textContent = "Nenhum serviço adicionado ainda.";
+    fragmento.append(vazio);
+  }
+
+  itens.replaceChildren(fragmento);
 
   const total = carrinho.reduce((soma, item) => soma + item.preco, 0);
   document.querySelector("#total-carrinho").textContent = dinheiro(total);
@@ -125,9 +178,17 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
   evento.preventDefault();
 
   const formulario = evento.currentTarget;
-  const nome = new FormData(formulario).get("nome");
+  const dadosFormulario = new FormData(formulario);
+  const tokenCaptcha = dadosFormulario.get("h-captcha-response");
   const mensagem = document.querySelector("#mensagem-sucesso");
   const botao = formulario.querySelector('button[type="submit"]');
+
+  if (typeof tokenCaptcha !== "string" || !tokenCaptcha) {
+    mensagem.textContent = "Confirme o hCaptcha antes de enviar a solicitação.";
+    return;
+  }
+
+  const nome = dadosFormulario.get("nome");
 
   botao.disabled = true;
   botao.textContent = "Enviando...";
@@ -135,8 +196,8 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
   try {
     const resposta = await fetch(formulario.action, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(new FormData(formulario)).toString()
+      // O navegador define o Content-Type correto para FormData e evita redirecionamento/CORS.
+      body: dadosFormulario
     });
     const resultado = await resposta.json();
 
@@ -150,7 +211,9 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
     mensagem.textContent = "Não foi possível enviar agora. Tente novamente em alguns instantes.";
   } finally {
     botao.disabled = false;
-    botao.innerHTML = "Enviar solicitação <span>→</span>";
+    const seta = document.createElement("span");
+    seta.textContent = "→";
+    botao.replaceChildren("Enviar solicitação ", seta);
   }
 });
 

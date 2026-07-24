@@ -4,6 +4,8 @@
     <!-- Metadados, fontes, tema e folha de estilos da página. -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://web3forms.com https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.web3forms.com https://hcaptcha.com https://*.hcaptcha.com; frame-src https://hcaptcha.com https://*.hcaptcha.com; form-action 'self' https://api.web3forms.com; upgrade-insecure-requests" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta
       name="description"
       content="KL Code | Soluções Digitais - Sites e soluções web."
@@ -141,15 +143,17 @@
         <p class="campo-antispam">
           <label>Não preencha este campo: <input type="checkbox" name="botcheck" /></label>
         </p>
-        <label>Nome<input type="text" name="nome" required /></label>
-        <label>E-mail<input type="email" name="email" required /></label>
-        <label>Mensagem<textarea name="mensagem" rows="4" placeholder="Descreva o que você precisa."></textarea></label>
+        <label>Nome<input type="text" name="nome" autocomplete="name" minlength="2" maxlength="100" required /></label>
+        <label>E-mail<input type="email" name="email" autocomplete="email" maxlength="254" required /></label>
+        <label>Mensagem<textarea name="mensagem" rows="4" maxlength="2000" placeholder="Descreva o que você precisa."></textarea></label>
+        <div class="h-captcha" data-captcha="true"></div>
         <button class="botao-principal" type="submit">Enviar solicitação <span>→</span></button>
       </form>
       <p class="mensagem-sucesso" id="mensagem-sucesso"></p>
     </dialog>
 
     <!-- Comportamentos da vitrine, orçamento, formulário e animações. -->
+    <script src="https://web3forms.com/client/script.js" async defer></script>
     <script src="script.js"></script>
   </body>
 </html>

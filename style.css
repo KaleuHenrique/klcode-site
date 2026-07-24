@@ -641,6 +641,8 @@ dialog h2 { font-size: 2rem; }
 
 form { display: grid; gap: 16px; }
 
+.h-captcha { min-height: 78px; }
+
 label {
   display: grid;
   gap: 7px;
