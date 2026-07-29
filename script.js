@@ -1,4 +1,12 @@
 // Catálogo exibido na seção de serviços.
+const banco = window.supabase.createClient(
+  "https://imbjoxybquirigtqgwju.supabase.co",
+  "sb_publishable_wj9eAwcOFwwA1EX7mdITdQ_2sVUWI6h"
+);
+
+let usuarioAtual = null;
+let modoConta = "cadastro";
+
 const servicos = [
   { id: 1, icone: "◈", nome: "Site institucional", descricao: "Um site profissional para apresentar sua empresa, serviços e contatos.", preco: 0 },
   { id: 2, icone: "▣", nome: "Landing page", descricao: "Página objetiva para campanhas, divulgação de produtos ou captação de clientes.", preco: 0 },
@@ -35,9 +43,13 @@ const listaServicos = document.querySelector("#lista-servicos");
 const painel = document.querySelector("#painel-carrinho");
 const fundo = document.querySelector("#fundo-painel");
 const modal = document.querySelector("#modal-contato");
+const modalConta = document.querySelector("#modal-conta");
 const fundoModal = document.querySelector("#fundo-modal");
 const botaoFecharModal = document.querySelector(".fechar-modal");
+const botaoFecharConta = document.querySelector(".fechar-conta");
 const botaoFinalizarOrcamento = document.querySelector("#finalizar-orcamento");
+const botaoAbrirConta = document.querySelector("#abrir-conta");
+const formularioConta = document.querySelector("#formulario-conta");
 
 // Cria os cartões de serviço a partir da lista acima.
 function mostrarServicos() {
@@ -144,6 +156,53 @@ function fecharModal() {
   botaoFinalizarOrcamento.focus();
 }
 
+function atualizarInterfaceConta() {
+  botaoAbrirConta.textContent = usuarioAtual ? "Conta ativa" : "Entrar";
+}
+
+function definirModoConta(modo) {
+  modoConta = modo;
+  const entrar = modo === "entrar";
+  document.querySelector("#titulo-conta").textContent = entrar ? "Entre na sua conta" : "Crie sua conta";
+  document.querySelector("#texto-conta").textContent = entrar
+    ? "Entre para continuar e enviar seu pedido de orçamento."
+    : "Para enviar um pedido de orçamento, faça um cadastro rápido. Assim consigo acompanhar seu pedido com mais segurança.";
+  document.querySelector("#enviar-conta").replaceChildren(entrar ? "Entrar" : "Criar conta", document.createTextNode(" →"));
+  document.querySelector("#alternar-conta").textContent = entrar ? "Ainda não tenho uma conta" : "Já tenho uma conta";
+  document.querySelector("#senha-conta").autocomplete = entrar ? "current-password" : "new-password";
+  document.querySelector("#mensagem-conta").textContent = "";
+}
+
+function abrirModalConta() {
+  definirModoConta(modoConta);
+  modalConta.show();
+  fundoModal.classList.add("visivel");
+  modalConta.setAttribute("aria-hidden", "false");
+  document.querySelector("#email-conta").focus();
+}
+
+function fecharModalConta() {
+  modalConta.close();
+  fundoModal.classList.remove("visivel");
+  modalConta.setAttribute("aria-hidden", "true");
+}
+
+function abrirFormularioOrcamento() {
+  prepararFormularioOrcamento();
+  const campoEmail = document.querySelector('#formulario-orcamento input[name="email"]');
+  campoEmail.value = usuarioAtual?.email || "";
+  campoEmail.readOnly = true;
+  fecharCarrinho();
+  abrirModal();
+}
+
+async function obterUsuarioAtual() {
+  const { data, error } = await banco.auth.getUser();
+  usuarioAtual = error ? null : data.user;
+  atualizarInterfaceConta();
+  return usuarioAtual;
+}
+
 // Preenche os campos enviados pelo formulário com o resumo do orçamento.
 function prepararFormularioOrcamento() {
   const listaDeServicos = carrinho
@@ -182,20 +241,89 @@ document.querySelector("#fechar-carrinho").addEventListener("click", fecharCarri
 fundo.addEventListener("click", fecharCarrinho);
 
 // Exibe o formulário somente com ao menos um serviço selecionado.
-botaoFinalizarOrcamento.addEventListener("click", () => {
-  prepararFormularioOrcamento();
-  fecharCarrinho();
-  abrirModal();
+botaoFinalizarOrcamento.addEventListener("click", async () => {
+  const usuario = await obterUsuarioAtual();
+
+  if (!usuario) {
+    fecharCarrinho();
+    abrirModalConta();
+    return;
+  }
+
+  abrirFormularioOrcamento();
 });
 
 // Fecha o formulário quando o botão de fechar é acionado.
 botaoFecharModal.addEventListener("click", fecharModal);
-fundoModal.addEventListener("click", fecharModal);
+botaoFecharConta.addEventListener("click", fecharModalConta);
+fundoModal.addEventListener("click", () => {
+  if (modal.open) fecharModal();
+  if (modalConta.open) fecharModalConta();
+});
 modal.addEventListener("keydown", evento => {
   if (evento.key !== "Escape") return;
 
   evento.preventDefault();
   fecharModal();
+});
+
+modalConta.addEventListener("keydown", evento => {
+  if (evento.key !== "Escape") return;
+
+  evento.preventDefault();
+  fecharModalConta();
+});
+
+botaoAbrirConta.addEventListener("click", async () => {
+  if (await obterUsuarioAtual()) return;
+
+  abrirModalConta();
+});
+
+document.querySelector("#alternar-conta").addEventListener("click", () => {
+  definirModoConta(modoConta === "cadastro" ? "entrar" : "cadastro");
+});
+
+formularioConta.addEventListener("submit", async evento => {
+  evento.preventDefault();
+
+  const email = document.querySelector("#email-conta").value.trim();
+  const senha = document.querySelector("#senha-conta").value;
+  const mensagemConta = document.querySelector("#mensagem-conta");
+  const botao = document.querySelector("#enviar-conta");
+
+  botao.disabled = true;
+  botao.textContent = modoConta === "entrar" ? "Entrando..." : "Criando conta...";
+
+  try {
+    const resultado = modoConta === "entrar"
+      ? await banco.auth.signInWithPassword({ email, password: senha })
+      : await banco.auth.signUp({
+        email,
+        password: senha,
+        options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` }
+      });
+
+    if (resultado.error) throw resultado.error;
+
+    usuarioAtual = resultado.data.session ? resultado.data.user : null;
+    atualizarInterfaceConta();
+
+    if (!resultado.data.session) {
+      definirModoConta("entrar");
+      mensagemConta.textContent = "Conta criada. Confirme o e-mail enviado para entrar e concluir seu orçamento.";
+      return;
+    }
+
+    formularioConta.reset();
+    fecharModalConta();
+    abrirFormularioOrcamento();
+  } catch {
+    mensagemConta.textContent = "Não foi possível concluir agora. Confira seu e-mail e senha e tente novamente.";
+  } finally {
+    botao.disabled = false;
+    botao.replaceChildren(modoConta === "entrar" ? "Entrar" : "Criar conta", document.createTextNode(" →"));
+  }
 });
 
 // Envia os dados do formulário ao serviço configurado no atributo action.
@@ -208,6 +336,12 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
   const mensagem = document.querySelector("#mensagem-sucesso");
   const botao = formulario.querySelector('button[type="submit"]');
 
+  if (!await obterUsuarioAtual()) {
+    fecharModal();
+    abrirModalConta();
+    return;
+  }
+
   if (typeof tokenCaptcha !== "string" || !tokenCaptcha) {
     mensagem.textContent = "Confirme o hCaptcha antes de enviar a solicitação.";
     return;
@@ -219,6 +353,19 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
   botao.textContent = "Enviando...";
 
   try {
+    const { error: erroBanco } = await banco
+      .from("orcamentos")
+      .insert({
+        usuario_id: usuarioAtual?.id,
+        nome,
+        email: dadosFormulario.get("email"),
+        mensagem: dadosFormulario.get("mensagem"),
+        servicos: dadosFormulario.get("detalhes_do_orcamento"),
+        valor_estimado: dadosFormulario.get("valor_estimado")
+      });
+
+    if (erroBanco) throw new Error("Falha ao salvar o orcamento");
+
     const resposta = await fetch(formulario.action, {
       method: "POST",
       // O navegador define o Content-Type correto para FormData e evita redirecionamento/CORS.
@@ -241,6 +388,13 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
     botao.replaceChildren("Enviar solicitação ", seta);
   }
 });
+
+banco.auth.onAuthStateChange((_evento, sessao) => {
+  usuarioAtual = sessao?.user || null;
+  atualizarInterfaceConta();
+});
+
+obterUsuarioAtual();
 
 // Atualiza o ano mostrado no rodapé.
 document.querySelector("#ano").textContent = new Date().getFullYear();

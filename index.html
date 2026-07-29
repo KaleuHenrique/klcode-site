@@ -4,7 +4,7 @@
     <!-- Metadados, fontes, tema e folha de estilos da página. -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://web3forms.com https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.web3forms.com https://hcaptcha.com https://*.hcaptcha.com; frame-src https://hcaptcha.com https://*.hcaptcha.com; form-action 'self' https://api.web3forms.com; upgrade-insecure-requests" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://web3forms.com https://hcaptcha.com https://*.hcaptcha.com https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.web3forms.com https://hcaptcha.com https://*.hcaptcha.com https://imbjoxybquirigtqgwju.supabase.co; frame-src https://hcaptcha.com https://*.hcaptcha.com; form-action 'self' https://api.web3forms.com; upgrade-insecure-requests" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta
       name="description"
@@ -32,6 +32,7 @@
       </nav>
       <div class="acoes-cabecalho">
         <button class="botao-tema" id="alternar-tema" type="button"><span class="icone-tema" aria-hidden="true">☾</span></button>
+        <button class="botao-conta" id="abrir-conta" type="button">Entrar</button>
         <button class="botao-carrinho" id="abrir-carrinho" type="button" aria-label="Abrir orçamento">
           Orçamento <span id="contador-carrinho">0</span>
         </button>
@@ -127,6 +128,20 @@
     <div class="fundo-modal" id="fundo-modal"></div>
 
     <!-- Formulário modal enviado ao serviço configurado. -->
+    <dialog id="modal-conta" aria-labelledby="titulo-conta">
+      <button class="fechar fechar-conta" type="button" aria-label="Fechar cadastro">×</button>
+      <p class="sobretitulo">ANTES DE ENVIAR</p>
+      <h2 id="titulo-conta">Crie sua conta</h2>
+      <p class="texto-conta" id="texto-conta">Para enviar um pedido de orçamento, faça um cadastro rápido. Assim consigo acompanhar seu pedido com mais segurança.</p>
+      <form id="formulario-conta">
+        <label>E-mail<input id="email-conta" type="email" autocomplete="email" maxlength="254" required /></label>
+        <label>Senha<input id="senha-conta" type="password" autocomplete="new-password" minlength="8" required /></label>
+        <button class="botao-principal" id="enviar-conta" type="submit">Criar conta <span>→</span></button>
+      </form>
+      <p class="mensagem-sucesso" id="mensagem-conta" role="status"></p>
+      <button class="link-conta" id="alternar-conta" type="button">Já tenho uma conta</button>
+    </dialog>
+
     <dialog id="modal-contato">
       <button class="fechar fechar-modal" type="button" aria-label="Fechar formulário">×</button>
         <p class="sobretitulo">QUASE LÁ</p>
@@ -157,6 +172,7 @@
 
     <!-- Comportamentos da vitrine, orçamento, formulário e animações. -->
     <script src="https://web3forms.com/client/script.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
   </body>
 </html>

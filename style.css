@@ -103,6 +103,16 @@ button, a { -webkit-tap-highlight-color: transparent; }
   box-shadow: none;
 }
 
+.botao-conta {
+  padding: 8px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  background: var(--superficie);
+  color: var(--escuro);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 /* ==================== Cabeçalho ==================== */
 .cabecalho {
   /* Mantém os elementos do cabeçalho alinhados e limitados à largura do site. */
@@ -693,6 +703,23 @@ textarea { resize: vertical; }
   margin: 15px 0 0;
   color: var(--amarelo);
   font-weight: 700;
+}
+
+.texto-conta {
+  margin-bottom: 22px;
+  color: var(--texto);
+  line-height: 1.55;
+}
+
+.link-conta {
+  display: block;
+  margin: 16px auto 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--escuro);
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 /* ==================== Textos animados pela rolagem ==================== */
