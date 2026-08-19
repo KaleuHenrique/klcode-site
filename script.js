@@ -1,12 +1,4 @@
 // Catálogo exibido na seção de serviços.
-const banco = window.supabase.createClient(
-  "https://imbjoxybquirigtqgwju.supabase.co",
-  "sb_publishable_wj9eAwcOFwwA1EX7mdITdQ_2sVUWI6h"
-);
-
-let usuarioAtual = null;
-let modoConta = "cadastro";
-
 const servicos = [
   { id: 1, icone: "◈", nome: "Site institucional", descricao: "Um site profissional para apresentar sua empresa, serviços e contatos.", preco: 0 },
   { id: 2, icone: "▣", nome: "Landing page", descricao: "Página objetiva para campanhas, divulgação de produtos ou captação de clientes.", preco: 0 },
@@ -16,16 +8,29 @@ const servicos = [
   { id: 6, icone: "?", nome: "Projeto personalizado", descricao: "Tem uma ideia diferente? Vamos desenhar a solução ideal para ela.", preco: 0 }
 ];
 
+// Mantém apenas serviços existentes e evita itens repetidos, inclusive em dados salvos.
+function normalizarCarrinho(itens) {
+  if (!Array.isArray(itens)) return [];
+
+  const idsAdicionados = new Set();
+
+  return itens.reduce((resultado, item) => {
+    const servico = servicos.find(candidato => candidato.id === Number(item?.id));
+
+    if (!servico || idsAdicionados.has(servico.id)) return resultado;
+
+    idsAdicionados.add(servico.id);
+    resultado.push(servico);
+    return resultado;
+  }, []);
+}
+
 // Recupera somente IDs conhecidos. Dados do localStorage podem ser alterados pelo visitante.
 function lerCarrinho() {
   try {
     const salvo = JSON.parse(localStorage.getItem("orcamentoKaleu"));
 
-    if (!Array.isArray(salvo)) return [];
-
-    return salvo
-      .map(item => servicos.find(servico => servico.id === Number(item?.id)))
-      .filter(Boolean);
+    return normalizarCarrinho(salvo);
   } catch {
     return [];
   }
@@ -43,13 +48,18 @@ const listaServicos = document.querySelector("#lista-servicos");
 const painel = document.querySelector("#painel-carrinho");
 const fundo = document.querySelector("#fundo-painel");
 const modal = document.querySelector("#modal-contato");
-const modalConta = document.querySelector("#modal-conta");
 const fundoModal = document.querySelector("#fundo-modal");
 const botaoFecharModal = document.querySelector(".fechar-modal");
-const botaoFecharConta = document.querySelector(".fechar-conta");
 const botaoFinalizarOrcamento = document.querySelector("#finalizar-orcamento");
-const botaoAbrirConta = document.querySelector("#abrir-conta");
-const formularioConta = document.querySelector("#formulario-conta");
+const botaoAbrirCarrinho = document.querySelector("#abrir-carrinho");
+const mensagemCarrinho = document.querySelector("#mensagem-carrinho");
+const mensagemFormulario = document.querySelector("#mensagem-sucesso");
+
+function mostrarMensagem(elemento, texto, tipo = "") {
+  elemento.textContent = texto;
+  elemento.className = elemento.id === "mensagem-carrinho" ? "mensagem-carrinho" : "mensagem-sucesso";
+  if (tipo) elemento.classList.add(`mensagem-${tipo}`);
+}
 
 // Cria os cartões de serviço a partir da lista acima.
 function mostrarServicos() {
@@ -85,12 +95,20 @@ function mostrarServicos() {
 
 // Salva o orçamento e atualiza o painel, contador e total exibidos.
 function atualizarCarrinho() {
+  carrinho = normalizarCarrinho(carrinho);
+
   try {
     localStorage.setItem("orcamentoKaleu", JSON.stringify(carrinho));
   } catch {
     // O orçamento continua disponível nesta visita quando o armazenamento falhar.
   }
   document.querySelector("#contador-carrinho").textContent = carrinho.length;
+
+  listaServicos.querySelectorAll(".adicionar").forEach(botao => {
+    const adicionado = carrinho.some(item => item.id === Number(botao.dataset.id));
+    botao.disabled = adicionado;
+    botao.textContent = adicionado ? "Adicionado" : "Adicionar";
+  });
 
   const itens = document.querySelector("#itens-carrinho");
   const fragmento = document.createDocumentFragment();
@@ -133,74 +151,49 @@ function abrirCarrinho() {
   painel.classList.add("aberto");
   fundo.classList.add("visivel");
   painel.setAttribute("aria-hidden", "false");
+  painel.removeAttribute("inert");
 }
 
 function fecharCarrinho() {
+  const focoEstavaNoPainel = painel.contains(document.activeElement);
+
   painel.classList.remove("aberto");
   fundo.classList.remove("visivel");
   painel.setAttribute("aria-hidden", "true");
+  painel.setAttribute("inert", "");
+
+  if (focoEstavaNoPainel) botaoAbrirCarrinho.focus();
 }
 
 // Usa um diálogo não modal para que o desafio do hCaptcha possa ficar acima do formulário.
 function abrirModal() {
+  carrinho = normalizarCarrinho(carrinho);
+
+  if (!carrinho.length) {
+    atualizarCarrinho();
+    mostrarMensagem(mensagemCarrinho, "Adicione ao menos um serviço antes de solicitar o orçamento.", "erro");
+    abrirCarrinho();
+    return false;
+  }
+
+  if (modal.open) return true;
+
+  prepararFormularioOrcamento();
   modal.show();
   fundoModal.classList.add("visivel");
   modal.setAttribute("aria-hidden", "false");
+  mostrarMensagem(mensagemFormulario, "");
   botaoFecharModal.focus();
+  return true;
 }
 
 function fecharModal() {
+  if (!modal.open) return;
+
   modal.close();
   fundoModal.classList.remove("visivel");
   modal.setAttribute("aria-hidden", "true");
-  botaoFinalizarOrcamento.focus();
-}
-
-function atualizarInterfaceConta() {
-  botaoAbrirConta.textContent = usuarioAtual ? "Conta ativa" : "Entrar";
-}
-
-function definirModoConta(modo) {
-  modoConta = modo;
-  const entrar = modo === "entrar";
-  document.querySelector("#titulo-conta").textContent = entrar ? "Entre na sua conta" : "Crie sua conta";
-  document.querySelector("#texto-conta").textContent = entrar
-    ? "Entre para continuar e enviar seu pedido de orçamento."
-    : "Para enviar um pedido de orçamento, faça um cadastro rápido. Assim consigo acompanhar seu pedido com mais segurança.";
-  document.querySelector("#enviar-conta").replaceChildren(entrar ? "Entrar" : "Criar conta", document.createTextNode(" →"));
-  document.querySelector("#alternar-conta").textContent = entrar ? "Ainda não tenho uma conta" : "Já tenho uma conta";
-  document.querySelector("#senha-conta").autocomplete = entrar ? "current-password" : "new-password";
-  document.querySelector("#mensagem-conta").textContent = "";
-}
-
-function abrirModalConta() {
-  definirModoConta(modoConta);
-  modalConta.show();
-  fundoModal.classList.add("visivel");
-  modalConta.setAttribute("aria-hidden", "false");
-  document.querySelector("#email-conta").focus();
-}
-
-function fecharModalConta() {
-  modalConta.close();
-  fundoModal.classList.remove("visivel");
-  modalConta.setAttribute("aria-hidden", "true");
-}
-
-function abrirFormularioOrcamento() {
-  prepararFormularioOrcamento();
-  const campoEmail = document.querySelector('#formulario-orcamento input[name="email"]');
-  campoEmail.value = usuarioAtual?.email || "";
-  campoEmail.readOnly = true;
-  fecharCarrinho();
-  abrirModal();
-}
-
-async function obterUsuarioAtual() {
-  const { data, error } = await banco.auth.getUser();
-  usuarioAtual = error ? null : data.user;
-  atualizarInterfaceConta();
-  return usuarioAtual;
+  botaoAbrirCarrinho.focus();
 }
 
 // Preenche os campos enviados pelo formulário com o resumo do orçamento.
@@ -221,8 +214,17 @@ listaServicos.addEventListener("click", evento => {
   if (!id) return;
 
   const servico = servicos.find(item => item.id === id);
+  if (!servico) return;
+
+  if (carrinho.some(item => item.id === servico.id)) {
+    mostrarMensagem(mensagemCarrinho, `${servico.nome} já está no seu orçamento.`, "aviso");
+    abrirCarrinho();
+    return;
+  }
+
   carrinho.push(servico);
   atualizarCarrinho();
+  mostrarMensagem(mensagemCarrinho, `${servico.nome} foi adicionado ao orçamento.`, "sucesso");
   abrirCarrinho();
 });
 
@@ -231,99 +233,34 @@ document.querySelector("#itens-carrinho").addEventListener("click", evento => {
   const indice = evento.target.dataset.remover;
   if (indice === undefined) return;
 
-  carrinho.splice(Number(indice), 1);
+  const posicao = Number(indice);
+  if (!Number.isInteger(posicao) || posicao < 0 || posicao >= carrinho.length) return;
+
+  const [removido] = carrinho.splice(posicao, 1);
   atualizarCarrinho();
+  mostrarMensagem(mensagemCarrinho, `${removido.nome} foi removido do orçamento.`, "aviso");
 });
 
 // Controles de abertura e fechamento do orçamento.
-document.querySelector("#abrir-carrinho").addEventListener("click", abrirCarrinho);
+botaoAbrirCarrinho.addEventListener("click", abrirCarrinho);
 document.querySelector("#fechar-carrinho").addEventListener("click", fecharCarrinho);
 fundo.addEventListener("click", fecharCarrinho);
 
 // Exibe o formulário somente com ao menos um serviço selecionado.
-botaoFinalizarOrcamento.addEventListener("click", async () => {
-  const usuario = await obterUsuarioAtual();
+botaoFinalizarOrcamento.addEventListener("click", () => {
+  if (!abrirModal()) return;
 
-  if (!usuario) {
-    fecharCarrinho();
-    abrirModalConta();
-    return;
-  }
-
-  abrirFormularioOrcamento();
+  fecharCarrinho();
 });
 
 // Fecha o formulário quando o botão de fechar é acionado.
 botaoFecharModal.addEventListener("click", fecharModal);
-botaoFecharConta.addEventListener("click", fecharModalConta);
-fundoModal.addEventListener("click", () => {
-  if (modal.open) fecharModal();
-  if (modalConta.open) fecharModalConta();
-});
+fundoModal.addEventListener("click", fecharModal);
 modal.addEventListener("keydown", evento => {
   if (evento.key !== "Escape") return;
 
   evento.preventDefault();
   fecharModal();
-});
-
-modalConta.addEventListener("keydown", evento => {
-  if (evento.key !== "Escape") return;
-
-  evento.preventDefault();
-  fecharModalConta();
-});
-
-botaoAbrirConta.addEventListener("click", async () => {
-  if (await obterUsuarioAtual()) return;
-
-  abrirModalConta();
-});
-
-document.querySelector("#alternar-conta").addEventListener("click", () => {
-  definirModoConta(modoConta === "cadastro" ? "entrar" : "cadastro");
-});
-
-formularioConta.addEventListener("submit", async evento => {
-  evento.preventDefault();
-
-  const email = document.querySelector("#email-conta").value.trim();
-  const senha = document.querySelector("#senha-conta").value;
-  const mensagemConta = document.querySelector("#mensagem-conta");
-  const botao = document.querySelector("#enviar-conta");
-
-  botao.disabled = true;
-  botao.textContent = modoConta === "entrar" ? "Entrando..." : "Criando conta...";
-
-  try {
-    const resultado = modoConta === "entrar"
-      ? await banco.auth.signInWithPassword({ email, password: senha })
-      : await banco.auth.signUp({
-        email,
-        password: senha,
-        options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` }
-      });
-
-    if (resultado.error) throw resultado.error;
-
-    usuarioAtual = resultado.data.session ? resultado.data.user : null;
-    atualizarInterfaceConta();
-
-    if (!resultado.data.session) {
-      definirModoConta("entrar");
-      mensagemConta.textContent = "Conta criada. Confirme o e-mail enviado para entrar e concluir seu orçamento.";
-      return;
-    }
-
-    formularioConta.reset();
-    fecharModalConta();
-    abrirFormularioOrcamento();
-  } catch {
-    mensagemConta.textContent = "Não foi possível concluir agora. Confira seu e-mail e senha e tente novamente.";
-  } finally {
-    botao.disabled = false;
-    botao.replaceChildren(modoConta === "entrar" ? "Entrar" : "Criar conta", document.createTextNode(" →"));
-  }
 });
 
 // Envia os dados do formulário ao serviço configurado no atributo action.
@@ -333,39 +270,21 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
   const formulario = evento.currentTarget;
   const dadosFormulario = new FormData(formulario);
   const tokenCaptcha = dadosFormulario.get("h-captcha-response");
-  const mensagem = document.querySelector("#mensagem-sucesso");
+  const mensagem = mensagemFormulario;
   const botao = formulario.querySelector('button[type="submit"]');
 
-  if (!await obterUsuarioAtual()) {
-    fecharModal();
-    abrirModalConta();
-    return;
-  }
-
   if (typeof tokenCaptcha !== "string" || !tokenCaptcha) {
-    mensagem.textContent = "Confirme o hCaptcha antes de enviar a solicitação.";
+    mostrarMensagem(mensagem, "Confirme o hCaptcha antes de enviar a solicitação.", "erro");
     return;
   }
 
   const nome = dadosFormulario.get("nome");
 
   botao.disabled = true;
+  mostrarMensagem(mensagem, "Enviando sua solicitação...");
   botao.textContent = "Enviando...";
 
   try {
-    const { error: erroBanco } = await banco
-      .from("orcamentos")
-      .insert({
-        usuario_id: usuarioAtual?.id,
-        nome,
-        email: dadosFormulario.get("email"),
-        mensagem: dadosFormulario.get("mensagem"),
-        servicos: dadosFormulario.get("detalhes_do_orcamento"),
-        valor_estimado: dadosFormulario.get("valor_estimado")
-      });
-
-    if (erroBanco) throw new Error("Falha ao salvar o orcamento");
-
     const resposta = await fetch(formulario.action, {
       method: "POST",
       // O navegador define o Content-Type correto para FormData e evita redirecionamento/CORS.
@@ -374,13 +293,12 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
     const resultado = await resposta.json();
 
     if (!resposta.ok || !resultado.success) throw new Error("Falha no envio");
-
-    mensagem.textContent = `Obrigado, ${nome}! Recebi sua solicitação e retornarei em breve.`;
+    mostrarMensagem(mensagem, `Obrigado, ${nome}! Recebi sua solicitação e retornarei em breve.`, "sucesso");
     formulario.reset();
     carrinho = [];
     atualizarCarrinho();
   } catch {
-    mensagem.textContent = "Não foi possível enviar agora. Tente novamente em alguns instantes.";
+    mostrarMensagem(mensagem, "Não foi possível enviar agora. Verifique sua conexão e tente novamente.", "erro");
   } finally {
     botao.disabled = false;
     const seta = document.createElement("span");
@@ -388,13 +306,6 @@ document.querySelector("#formulario-orcamento").addEventListener("submit", async
     botao.replaceChildren("Enviar solicitação ", seta);
   }
 });
-
-banco.auth.onAuthStateChange((_evento, sessao) => {
-  usuarioAtual = sessao?.user || null;
-  atualizarInterfaceConta();
-});
-
-obterUsuarioAtual();
 
 // Atualiza o ano mostrado no rodapé.
 document.querySelector("#ano").textContent = new Date().getFullYear();
@@ -428,6 +339,9 @@ function animarTextosNaRolagem() {
 
   textosAnimados.forEach(texto => {
     const posicao = texto.getBoundingClientRect();
+    const deslocamento = Math.min(36, Math.max(0, (window.innerHeight - posicao.top) * 0.08));
+    texto.style.setProperty("--scroll-shift", `${deslocamento}px`);
+
     const estaNaTela = posicao.top < limiteDeEntrada && posicao.bottom > 0;
     const estaForaDaTela = posicao.bottom <= 0 || posicao.top >= window.innerHeight;
 

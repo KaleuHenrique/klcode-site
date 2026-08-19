@@ -1,71 +1,89 @@
 // Mantém o tema visual sincronizado entre as páginas do site.
 (() => {
-  // Chave usada para persistir a preferência de tema do visitante.
   const chaveTema = "temaKaleu";
-  // Consulta a preferência de cor definida no sistema operacional.
-  const prefereEscuro = window.matchMedia("(prefers-color-scheme: dark)");
+  const temasValidos = new Set(["claro", "escuro"]);
+  const consultaTemaSistema = typeof window.matchMedia === "function"
+    ? window.matchMedia("(prefers-color-scheme: dark)")
+    : null;
 
-  // Lê a preferência salva sem interromper o site quando o armazenamento não estiver disponível.
-  function temaSalvo() {
+  // Lê somente preferências válidas e trata armazenamento bloqueado ou corrompido.
+  function lerTemaSalvo() {
     try {
-      return localStorage.getItem(chaveTema);
+      const tema = localStorage.getItem(chaveTema);
+
+      if (temasValidos.has(tema)) return tema;
+      if (tema !== null) localStorage.removeItem(chaveTema);
     } catch {
-      return null;
+      // O tema ainda funciona nesta visita quando o armazenamento não estiver disponível.
     }
+
+    return null;
   }
 
-  // Aplica o tema ao documento e atualiza o ícone e o texto do botão, quando existir.
-  function aplicarTema(tema) {
-    document.documentElement.dataset.theme = tema;
-    const botao = document.querySelector("#alternar-tema");
+  function temaDoSistema() {
+    return consultaTemaSistema?.matches ? "escuro" : "claro";
+  }
 
-    if (botao) {
-      const escuro = tema === "escuro";
-      botao.querySelector(".icone-tema").textContent = escuro ? "☀" : "☾";
+  let temaManual = lerTemaSalvo();
+
+  // Aplica o tema antes da folha de estilos ser carregada, reduzindo o flash inicial.
+  function aplicarTema(tema) {
+    const temaSeguro = temasValidos.has(tema) ? tema : temaDoSistema();
+    const raiz = document.documentElement;
+
+    raiz.dataset.theme = temaSeguro;
+
+    const botao = document.querySelector("#alternar-tema");
+    const icone = botao?.querySelector(".icone-tema");
+
+    if (botao && icone) {
+      const escuro = temaSeguro === "escuro";
+      icone.textContent = escuro ? "☀" : "☾";
       botao.setAttribute("aria-label", escuro ? "Ativar tema claro" : "Ativar tema escuro");
       botao.title = escuro ? "Ativar tema claro" : "Ativar tema escuro";
     }
   }
 
-  // Define o tema antes da página aparecer para evitar mudança visual brusca.
-  aplicarTema(temaSalvo() || (prefereEscuro.matches ? "escuro" : "claro"));
+  function salvarTema(tema) {
+    temaManual = tema;
 
-  // Configura o botão presente no cabeçalho das páginas.
+    try {
+      localStorage.setItem(chaveTema, tema);
+    } catch {
+      // Mantém a escolha em memória até o fim desta visita.
+    }
+  }
+
+  aplicarTema(temaManual || temaDoSistema());
+
   function configurarBotao() {
     const botao = document.querySelector("#alternar-tema");
     if (!botao) return;
 
     aplicarTema(document.documentElement.dataset.theme);
     botao.addEventListener("click", () => {
-      // Alterna entre os dois temas disponíveis.
-      const proximoTema = document.documentElement.dataset.theme === "escuro" ? "claro" : "escuro";
+      const temaAtual = document.documentElement.dataset.theme;
+      const proximoTema = temaAtual === "escuro" ? "claro" : "escuro";
 
-      try {
-        localStorage.setItem(chaveTema, proximoTema);
-      } catch {
-        // A preferência ainda funciona nesta visita.
-      }
-
+      salvarTema(proximoTema);
       aplicarTema(proximoTema);
     });
   }
 
-  // Aguarda o botão existir caso o script seja carregado no cabeçalho.
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", configurarBotao);
+    document.addEventListener("DOMContentLoaded", configurarBotao, { once: true });
   } else {
     configurarBotao();
   }
 
-  // Segue mudanças do sistema apenas quando o visitante não escolheu um tema manualmente.
+  // Só acompanha o sistema enquanto o visitante não tiver escolhido um tema.
   function acompanharTemaDoSistema(evento) {
-    if (!temaSalvo()) aplicarTema(evento.matches ? "escuro" : "claro");
+    if (!temaManual) aplicarTema(evento.matches ? "escuro" : "claro");
   }
 
-  // Mantém compatibilidade com versões antigas de navegadores.
-  if (prefereEscuro.addEventListener) {
-    prefereEscuro.addEventListener("change", acompanharTemaDoSistema);
-  } else {
-    prefereEscuro.addListener(acompanharTemaDoSistema);
+  if (consultaTemaSistema?.addEventListener) {
+    consultaTemaSistema.addEventListener("change", acompanharTemaDoSistema);
+  } else if (consultaTemaSistema?.addListener) {
+    consultaTemaSistema.addListener(acompanharTemaDoSistema);
   }
 })();
