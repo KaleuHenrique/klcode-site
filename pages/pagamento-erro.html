@@ -6,28 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'self'; upgrade-insecure-requests" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <meta name="description" content="Pagamento concluído - KL Code | Soluções Digitais" />
-    <title>Pagamento concluído | KL Code | Soluções Digitais</title>
+    <meta name="description" content="Pagamento não concluído - KL Code | Soluções Digitais" />
+    <title>Pagamento não concluído | KL Code | Soluções Digitais</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <script src="theme.js"></script>
-    <link rel="stylesheet" href="style.css" />
+    <script src="../js/theme.js"></script>
+    <link rel="stylesheet" href="../css/style.css" />
   </head>
   <body>
     <!-- Cabeçalho simplificado para retornar à página inicial. -->
     <header class="cabecalho">
-      <a class="logo" href="index.html"><span class="nome-logo">KL Code<span>.</span></span><small>Soluções Digitais</small></a>
+      <a class="logo" href="../index.html"><span class="nome-logo">KL Code<span>.</span></span><small>Soluções Digitais</small></a>
       <button class="botao-tema" id="alternar-tema" type="button"><span class="icone-tema" aria-hidden="true">☾</span></button>
     </header>
-    <!-- Mensagem exibida quando o pagamento é confirmado. -->
+    <!-- Mensagem exibida quando o pagamento não é concluído. -->
     <main class="pagina-status">
-      <section class="cartao-status sucesso">
-        <span class="icone-status" aria-hidden="true">✓</span>
-        <p class="sobretitulo">PAGAMENTO CONFIRMADO</p>
-        <h1>Obrigado pelo seu pagamento!</h1>
-        <p>Recebemos a confirmação. Em breve você receberá as próximas informações no e-mail informado.</p>
-        <a class="botao-principal" href="index.html">Voltar para o início <span>→</span></a>
+      <section class="cartao-status erro">
+        <span class="icone-status" aria-hidden="true">!</span>
+        <p class="sobretitulo">PAGAMENTO NÃO CONCLUÍDO</p>
+        <h1>Não foi possível confirmar o pagamento.</h1>
+        <p>Nenhuma cobrança foi confirmada. Verifique os dados informados ou tente novamente mais tarde.</p>
+        <a class="botao-principal" href="../index.html#servicos">Voltar aos serviços <span>→</span></a>
       </section>
     </main>
   </body>
