@@ -46,13 +46,16 @@ Para testar mais próximo da publicação, abra esta pasta no VS Code e use a ex
 
 ## Personalizar o conteúdo
 
-| O que alterar | Onde alterar |
-| --- | --- |
-| Serviços, descrições e preços | `js/script.js`, na constante `servicos` |
-| Textos, e-mail e links sociais | `index.html` |
-| Cores, layout e responsividade | `css/style.css` |
-| Logotipo e ícones | `assets/` |
-| Comportamento dos temas | `js/theme.js` |
+| O que alterar | Arquivo ou pasta | Como alterar |
+| --- | --- | --- |
+| Serviços, descrições, ícones e preços | `js/script.js` | Edite a constante `servicos`. Cada item possui `id`, `icone`, `nome`, `descricao` e `preco`. |
+| Textos da página, e-mail e links sociais | `index.html` | Atualize os conteúdos das seções e os atributos `href` dos links. |
+| Formulário de orçamento | `index.html` | Altere a chave do Web3Forms, o assunto do e-mail e os campos do formulário. |
+| Cores, fontes, layout e responsividade | `css/style.css` | Ajuste as variáveis, seletores e regras de mídia. |
+| Logotipo e ícones das redes sociais | `assets/logo/` e `assets/icons/` | Substitua os arquivos mantendo os mesmos nomes ou atualize os caminhos em `index.html`. |
+| Tema claro e escuro | `js/theme.js` | Altere a chave de armazenamento ou a lógica de troca de tema. As cores ficam em `css/style.css`. |
+| Páginas de retorno de pagamento | `pages/` | Edite `pagamento-concluido.html` e `pagamento-erro.html` conforme a integração de pagamento. |
+| Cabeçalhos e política de segurança | `_headers` e `SEGURANCA.md` | Atualize as regras apenas quando adicionar serviços, domínios ou recursos externos. |
 
 Ao definir preços, substitua o campo `preco: 0` pelo valor numérico em reais, por exemplo `preco: 1500`. O site formatará o valor automaticamente como moeda brasileira.
 
