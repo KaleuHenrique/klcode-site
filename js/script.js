@@ -1,11 +1,11 @@
 // Catálogo exibido na seção de serviços.
 const servicos = [
-  { id: 1, icone: "◈", nome: "Site institucional", descricao: "Um site profissional para apresentar sua empresa, serviços e contatos.", preco: 0 },
-  { id: 2, icone: "▣", nome: "Landing page", descricao: "Página objetiva para campanhas, divulgação de produtos ou captação de clientes.", preco: 0 },
-  { id: 3, icone: "⌘", nome: "Loja virtual", descricao: "Catálogo de produtos, carrinho e estrutura pronta para começar a vender online.", preco: 0 },
-  { id: 4, icone: "↻", nome: "Manutenção", descricao: "Ajustes, melhorias e correções para manter seu site funcionando bem.", preco: 0 },
-  { id: 5, icone: "✦", nome: "Identidade digital", descricao: "Estrutura visual e páginas consistentes para fortalecer sua presença online.", preco: 0 },
-  { id: 6, icone: "?", nome: "Projeto personalizado", descricao: "Tem uma ideia diferente? Vamos desenhar a solução ideal para ela.", preco: 0 }
+  { id: 1, icone: "◈", nome: "Site institucional", descricao: "Um site profissional para apresentar sua empresa, serviços e contatos.", preco: 0, imagem: { srcUrl: "", alt: "Cartão Coverflow 1" } },
+  { id: 2, icone: "▣", nome: "Landing page", descricao: "Página objetiva para campanhas, divulgação de produtos ou captação de clientes.", preco: 0, imagem: { srcUrl: "", alt: "Cartão Coverflow 2" } },
+  { id: 3, icone: "⌘", nome: "Loja virtual", descricao: "Catálogo de produtos, carrinho e estrutura pronta para começar a vender online.", preco: 0, imagem: { srcUrl: "", alt: "Cartão Coverflow 3" } },
+  { id: 4, icone: "↻", nome: "Manutenção", descricao: "Ajustes, melhorias e correções para manter seu site funcionando bem.", preco: 0, imagem: { srcUrl: "", alt: "Cartão Coverflow 4" } },
+  { id: 5, icone: "✦", nome: "Identidade digital", descricao: "Estrutura visual e páginas consistentes para fortalecer sua presença online.", preco: 0, imagem: { srcUrl: "", alt: "Cartão Coverflow 5" } },
+  { id: 6, icone: "?", nome: "Projeto personalizado", descricao: "Tem uma ideia diferente? Vamos desenhar a solução ideal para ela.", preco: 0, imagem: { srcUrl: "", alt: "Cartão Coverflow 6" } }
 ];
 
 // Mantém apenas serviços existentes e evita itens repetidos, inclusive em dados salvos.
@@ -68,6 +68,15 @@ function mostrarServicos() {
   servicos.forEach(servico => {
     const cartao = document.createElement("article");
     cartao.className = "servico";
+    if (servico.imagem?.srcUrl) {
+      cartao.classList.add("com-imagem");
+      const imagem = document.createElement("img");
+      imagem.className = "imagem-servico";
+      imagem.src = servico.imagem.srcUrl;
+      imagem.alt = servico.imagem.alt;
+      imagem.loading = "lazy";
+      cartao.append(imagem);
+    }
     const icone = document.createElement("span");
     icone.className = "icone";
     icone.textContent = servico.icone;
@@ -91,6 +100,99 @@ function mostrarServicos() {
   });
 
   listaServicos.replaceChildren(fragmento);
+}
+
+// Organiza os serviços como cartas na mão e permite navegação circular.
+function configurarCarrosselServicos() {
+  const cartoes = [...listaServicos.querySelectorAll(".servico")];
+  const botaoAnterior = document.querySelector("#servico-anterior");
+  const botaoProximo = document.querySelector("#servico-proximo");
+  if (!cartoes.length || !botaoAnterior || !botaoProximo) return;
+
+  let indiceAtivo = 0;
+  let inicioDoGesto = null;
+  let ignorarClique = false;
+
+  function selecionarServico(indice) {
+    indiceAtivo = (indice + cartoes.length) % cartoes.length;
+    const compacto = window.matchMedia("(max-width: 720px)").matches;
+    const distanciaBase = compacto ? 92 : 148;
+    const abertura = compacto ? 9 : 16;
+    const limiteLateral = listaServicos.clientWidth / 2 - 12;
+    const ajusteRotacao = Math.min(1, listaServicos.clientWidth / 720);
+
+    cartoes.forEach((cartao, indiceDoCartao) => {
+      cartao.classList.toggle("servico-ativo", indiceDoCartao === indiceAtivo);
+    });
+
+    const disposicao = cartoes.map((cartao, indiceDoCartao) => {
+      let posicao = indiceDoCartao - indiceAtivo;
+      const metade = cartoes.length / 2;
+
+      if (posicao > metade) posicao -= cartoes.length;
+      if (posicao < -metade) posicao += cartoes.length;
+
+      const distancia = Math.abs(posicao);
+      const deslocamento = posicao * distanciaBase + Math.sign(posicao) * distancia * distancia * abertura;
+      const rotacao = posicao * 7 * ajusteRotacao;
+      const escala = Math.max(0.66, 1 - distancia * 0.1);
+      const angulo = Math.abs(rotacao) * Math.PI / 180;
+      // A rotação a partir da base também projeta a altura do card para os lados.
+      const extensao = escala * (cartao.offsetWidth / 2 * Math.cos(angulo) + cartao.offsetHeight * Math.sin(angulo));
+      return { cartao, distancia, deslocamento, rotacao, escala, extensao };
+    });
+
+    const ajusteAbertura = Math.max(0, Math.min(1, ...disposicao
+      .filter(({ distancia }) => distancia > 0)
+      .map(({ deslocamento, extensao }) => (limiteLateral - extensao) / Math.abs(deslocamento))));
+
+    disposicao.forEach(({ cartao, distancia, deslocamento, rotacao, escala }) => {
+      cartao.style.setProperty("--deslocamento", `${deslocamento * ajusteAbertura}px`);
+      cartao.style.setProperty("--rotacao", `${rotacao}deg`);
+      cartao.style.setProperty("--escala", String(escala));
+      cartao.style.setProperty("--opacidade", String(Math.max(0.24, 1 - distancia * 0.2)));
+      cartao.style.setProperty("--camada", String(cartoes.length - distancia));
+    });
+  }
+
+  botaoAnterior.addEventListener("click", () => selecionarServico(indiceAtivo - 1));
+  botaoProximo.addEventListener("click", () => selecionarServico(indiceAtivo + 1));
+  cartoes.forEach((cartao, indice) => {
+    cartao.addEventListener("click", evento => {
+      if (ignorarClique || evento.target.closest(".adicionar")) return;
+      selecionarServico(indice);
+    });
+  });
+
+  listaServicos.addEventListener("pointerdown", evento => {
+    if (evento.pointerType === "mouse") return;
+    inicioDoGesto = evento.clientX;
+    listaServicos.setPointerCapture?.(evento.pointerId);
+  });
+
+  listaServicos.addEventListener("pointerup", evento => {
+    if (inicioDoGesto === null) return;
+    const deslocamento = evento.clientX - inicioDoGesto;
+    inicioDoGesto = null;
+    if (listaServicos.hasPointerCapture?.(evento.pointerId)) {
+      listaServicos.releasePointerCapture(evento.pointerId);
+    }
+
+    if (Math.abs(deslocamento) < 36) return;
+    ignorarClique = true;
+    selecionarServico(indiceAtivo + (deslocamento < 0 ? 1 : -1));
+    window.setTimeout(() => { ignorarClique = false; }, 0);
+  });
+
+  listaServicos.addEventListener("pointercancel", evento => {
+    inicioDoGesto = null;
+    if (listaServicos.hasPointerCapture?.(evento.pointerId)) {
+      listaServicos.releasePointerCapture(evento.pointerId);
+    }
+  });
+  window.addEventListener("resize", () => selecionarServico(indiceAtivo));
+  document.fonts.ready.then(() => selecionarServico(indiceAtivo));
+  selecionarServico(0);
 }
 
 // Salva o orçamento e atualiza o painel, contador e total exibidos.
@@ -312,6 +414,7 @@ document.querySelector("#ano").textContent = new Date().getFullYear();
 
 // Renderiza os dados iniciais do site.
 mostrarServicos();
+configurarCarrosselServicos();
 atualizarCarrinho();
 
 // Seleciona os elementos que devem aparecer gradualmente durante a rolagem.
@@ -364,3 +467,79 @@ window.addEventListener("scroll", () => {
 // Recalcula a posição dos elementos quando o tamanho da janela mudar.
 window.addEventListener("resize", animarTextosNaRolagem);
 animarTextosNaRolagem();
+
+// Cria um fundo de partículas douradas com movimento leve e baixo custo de renderização.
+function iniciarParticulasDeFundo() {
+  const tela = document.querySelector("#particulas-fundo");
+  if (!tela) return;
+
+  const contexto = tela.getContext("2d");
+  const movimentoReduzido = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const cor = "247, 199, 101";
+  let particulas = [];
+  let largura = 0;
+  let altura = 0;
+  let quadro;
+
+  function criarParticula(entradaAleatoria = true) {
+    return {
+      x: Math.random() * largura,
+      y: entradaAleatoria ? Math.random() * altura : -8,
+      raio: 0.6 + Math.random() * 1.7,
+      opacidade: 0.2 + Math.random() * 0.58,
+      velocidade: 0.8 + Math.random() * 1.9,
+      deriva: -0.18 + Math.random() * 0.36
+    };
+  }
+
+  function redimensionar() {
+    const densidade = Math.min(window.devicePixelRatio || 1, 2);
+    largura = window.innerWidth;
+    altura = window.innerHeight;
+    tela.width = Math.floor(largura * densidade);
+    tela.height = Math.floor(altura * densidade);
+    contexto.setTransform(densidade, 0, 0, densidade, 0, 0);
+
+    const quantidade = largura < 700 ? 70 : 150;
+    particulas = Array.from({ length: quantidade }, () => criarParticula());
+    desenhar();
+  }
+
+  function desenhar() {
+    contexto.clearRect(0, 0, largura, altura);
+
+    particulas.forEach(particula => {
+      contexto.beginPath();
+      contexto.fillStyle = `rgba(${cor}, ${particula.opacidade})`;
+      contexto.arc(particula.x, particula.y, particula.raio, 0, Math.PI * 2);
+      contexto.fill();
+    });
+  }
+
+  function animar() {
+    particulas.forEach(particula => {
+      particula.y += particula.velocidade;
+      particula.x += particula.deriva;
+
+      if (particula.y > altura + particula.raio || particula.x < -8 || particula.x > largura + 8) {
+        Object.assign(particula, criarParticula(false));
+      }
+    });
+
+    desenhar();
+    quadro = requestAnimationFrame(animar);
+  }
+
+  function atualizarMovimento() {
+    cancelAnimationFrame(quadro);
+    desenhar();
+    if (!movimentoReduzido.matches) quadro = requestAnimationFrame(animar);
+  }
+
+  window.addEventListener("resize", redimensionar, { passive: true });
+  movimentoReduzido.addEventListener?.("change", atualizarMovimento);
+  redimensionar();
+  atualizarMovimento();
+}
+
+iniciarParticulasDeFundo();

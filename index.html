@@ -18,10 +18,10 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <script src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
+    <canvas class="particulas-fundo" id="particulas-fundo" aria-hidden="true"></canvas>
     <!-- Cabeçalho de navegação e ações rápidas. -->
     <header class="cabecalho">
       <a class="logo" href="#inicio"><span class="nome-logo">KL Code<span>.</span></span><small>Soluções Digitais</small></a>
@@ -31,7 +31,6 @@
         <a href="#contato">Contato</a>
       </nav>
       <div class="acoes-cabecalho">
-        <button class="botao-tema" id="alternar-tema" type="button"><span class="icone-tema" aria-hidden="true">☾</span></button>
         <button class="botao-carrinho" id="abrir-carrinho" type="button" aria-label="Abrir orçamento">
           Orçamento <span id="contador-carrinho">0</span>
         </button>
@@ -74,14 +73,40 @@
           </div>
           <p>Escolha os serviços que fazem sentido para seu projeto e envie uma solicitação de orçamento.</p>
         </div>
-        <div class="grade-servicos" id="lista-servicos"></div>
+        <div class="carrossel-servicos" aria-label="Carrossel de serviços">
+          <button class="navegar-servicos anterior" id="servico-anterior" type="button" aria-label="Mostrar serviço anterior" aria-controls="lista-servicos">←</button>
+          <div class="grade-servicos" id="lista-servicos" aria-live="polite"></div>
+          <button class="navegar-servicos proximo" id="servico-proximo" type="button" aria-label="Mostrar próximo serviço" aria-controls="lista-servicos">→</button>
+        </div>
       </section>
 
       <!-- Breve apresentação profissional. -->
       <section class="secao sobre" id="sobre">
         <p class="sobretitulo">SOBRE MIM</p>
         <h2>Desenvolvimento com cuidado em cada detalhe.</h2>
-        <p>Sou Kaléu Henrique. Meu objetivo é transformar necessidades reais em soluções digitais claras, bonitas e fáceis de usar.</p>
+        <p>
+          Olá! Meu nome é Kaléu Henrique, sou estudante de Ciência da Computação e atuo na área de tecnologia, com foco em desenvolvimento Front-End.
+        </p>
+
+        <p>
+          Tenho conhecimentos em HTML, CSS e JavaScript, além de experiência com criação, manutenção e publicação de sites. Também venho ampliando meus conhecimentos em desenvolvimento Back-End e buscando constantemente evoluir na área de programação.
+        </p>
+
+        <p>
+          A KLCODE nasceu com o objetivo de oferecer soluções digitais personalizadas para empresas e profissionais, principalmente através do desenvolvimento de sites modernos, responsivos e funcionais.
+        </p>
+
+        <p>
+          Meu foco como freelancer é entender a necessidade de cada cliente e transformar suas ideias em uma presença digital profissional, buscando entregar projetos com qualidade, organização, bom desempenho e uma experiência agradável para o usuário.
+        </p>
+
+        <p>
+          Se você precisa de um site para apresentar sua empresa, divulgar seus serviços, conquistar novos clientes ou fortalecer sua presença na internet, a KLCODE pode ajudar a transformar essa ideia em realidade.
+        </p>
+
+        <p class="assinatura">
+          KLCODE — Tecnologia, criatividade e soluções digitais.
+        </p>
       </section>
 
       <!-- Canais de contato e redes sociais. -->
@@ -91,7 +116,7 @@
           <h2>Tem um projeto em mente?</h2>
         </div>
         <div class="contato-acoes">
-          <a class="botao-principal claro" href="mailto:kaleucbq@hotmail.com">Enviar e-mail <span>→</span></a>
+          <a class="botao-principal botao-contato" href="mailto:kaleucbq@hotmail.com">Enviar e-mail <span>→</span></a>
           <div class="redes-sociais" aria-label="Redes sociais">
             <a href="https://www.instagram.com/kaleu_hr?igsh=ZHZtZnN1aGV5aXd4" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <img src="assets/icons/Instagram.png" alt="Instagram">

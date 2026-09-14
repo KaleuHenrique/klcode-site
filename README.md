@@ -6,9 +6,9 @@ Site institucional da KL Code para apresentar serviços de desenvolvimento web e
 
 - Catálogo de serviços criado dinamicamente com JavaScript.
 - Seleção de serviços em um painel de orçamento.
-- Manutenção da seleção e do tema no navegador, por meio do `localStorage`.
+- Manutenção da seleção no navegador, por meio do `localStorage`.
 - Formulário de solicitação integrado ao [Web3Forms](https://web3forms.com/) e protegido por hCaptcha.
-- Alternância entre tema claro e escuro, respeitando inicialmente a preferência do sistema.
+- Tema escuro como aparência única e padrão do site.
 - Layout adaptado para celulares e computadores, animações na rolagem e links de contato/redes sociais.
 - Cabeçalhos de segurança prontos para Netlify e Cloudflare Pages.
 
@@ -32,7 +32,6 @@ Os valores exibidos atualmente são **“Sob consulta”**. Por isso, o total é
 ├── assets/                      # Logotipo e ícones das redes sociais
 ├── css/style.css                # Estilos, responsividade e animações
 ├── js/script.js                 # Serviços, orçamento e envio do formulário
-├── js/theme.js                  # Tema claro/escuro
 ├── pages/                       # Páginas de retorno de pagamento
 ├── _headers                     # Cabeçalhos para Netlify/Cloudflare Pages
 └── SEGURANCA.md                 # Orientações de segurança
@@ -53,7 +52,7 @@ Para testar mais próximo da publicação, abra esta pasta no VS Code e use a ex
 | Formulário de orçamento | `index.html` | Altere a chave do Web3Forms, o assunto do e-mail e os campos do formulário. |
 | Cores, fontes, layout e responsividade | `css/style.css` | Ajuste as variáveis, seletores e regras de mídia. |
 | Logotipo e ícones das redes sociais | `assets/logo/` e `assets/icons/` | Substitua os arquivos mantendo os mesmos nomes ou atualize os caminhos em `index.html`. |
-| Tema claro e escuro | `js/theme.js` | Altere a chave de armazenamento ou a lógica de troca de tema. As cores ficam em `css/style.css`. |
+| Tema visual | `css/style.css` | Ajuste a paleta escura única do site. |
 | Páginas de retorno de pagamento | `pages/` | Edite `pagamento-concluido.html` e `pagamento-erro.html` conforme a integração de pagamento. |
 | Cabeçalhos e política de segurança | `_headers` e `SEGURANCA.md` | Atualize as regras apenas quando adicionar serviços, domínios ou recursos externos. |
 
