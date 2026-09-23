@@ -105,9 +105,7 @@ function mostrarServicos() {
 // Organiza os serviços como cartas na mão e permite navegação circular.
 function configurarCarrosselServicos() {
   const cartoes = [...listaServicos.querySelectorAll(".servico")];
-  const botaoAnterior = document.querySelector("#servico-anterior");
-  const botaoProximo = document.querySelector("#servico-proximo");
-  if (!cartoes.length || !botaoAnterior || !botaoProximo) return;
+  if (!cartoes.length) return;
 
   let indiceAtivo = 0;
   let inicioDoGesto = null;
@@ -133,35 +131,45 @@ function configurarCarrosselServicos() {
       if (posicao < -metade) posicao += cartoes.length;
 
       const distancia = Math.abs(posicao);
+      // Com quantidade par, o card oposto aguarda fora do leque para equilibrar os lados.
+      const oculto = cartoes.length > 2 && distancia === metade;
       const deslocamento = posicao * distanciaBase + Math.sign(posicao) * distancia * distancia * abertura;
       const rotacao = posicao * 7 * ajusteRotacao;
       const escala = Math.max(0.66, 1 - distancia * 0.1);
       const angulo = Math.abs(rotacao) * Math.PI / 180;
       // A rotação a partir da base também projeta a altura do card para os lados.
       const extensao = escala * (cartao.offsetWidth / 2 * Math.cos(angulo) + cartao.offsetHeight * Math.sin(angulo));
-      return { cartao, distancia, deslocamento, rotacao, escala, extensao };
+      return { cartao, distancia, oculto, deslocamento, rotacao, escala, extensao };
     });
 
     const ajusteAbertura = Math.max(0, Math.min(1, ...disposicao
-      .filter(({ distancia }) => distancia > 0)
+      .filter(({ distancia, oculto }) => distancia > 0 && !oculto)
       .map(({ deslocamento, extensao }) => (limiteLateral - extensao) / Math.abs(deslocamento))));
 
-    disposicao.forEach(({ cartao, distancia, deslocamento, rotacao, escala }) => {
-      cartao.style.setProperty("--deslocamento", `${deslocamento * ajusteAbertura}px`);
-      cartao.style.setProperty("--rotacao", `${rotacao}deg`);
+    disposicao.forEach(({ cartao, distancia, oculto, deslocamento, rotacao, escala }) => {
+      cartao.classList.toggle("servico-oculto", oculto);
+      cartao.inert = oculto;
+      cartao.style.setProperty("--deslocamento", `${oculto ? 0 : deslocamento * ajusteAbertura}px`);
+      cartao.style.setProperty("--rotacao", `${oculto ? 0 : rotacao}deg`);
       cartao.style.setProperty("--escala", String(escala));
-      cartao.style.setProperty("--opacidade", String(Math.max(0.24, 1 - distancia * 0.2)));
+      cartao.style.setProperty("--opacidade", String(oculto ? 0 : Math.max(0.24, 1 - distancia * 0.2)));
       cartao.style.setProperty("--camada", String(cartoes.length - distancia));
     });
   }
 
-  botaoAnterior.addEventListener("click", () => selecionarServico(indiceAtivo - 1));
-  botaoProximo.addEventListener("click", () => selecionarServico(indiceAtivo + 1));
   cartoes.forEach((cartao, indice) => {
     cartao.addEventListener("click", evento => {
       if (ignorarClique || evento.target.closest(".adicionar")) return;
       selecionarServico(indice);
     });
+  });
+
+  listaServicos.addEventListener("keydown", evento => {
+    if (evento.target !== listaServicos) return;
+    if (evento.key !== "ArrowLeft" && evento.key !== "ArrowRight") return;
+
+    evento.preventDefault();
+    selecionarServico(indiceAtivo + (evento.key === "ArrowRight" ? 1 : -1));
   });
 
   listaServicos.addEventListener("pointerdown", evento => {
@@ -421,7 +429,7 @@ atualizarCarrinho();
 const candidatosParaAnimacao = document.querySelectorAll(`
   .hero .sobretitulo, .hero h1, .texto-hero, .hero .botao-principal,
   .titulo-secao .sobretitulo, .titulo-secao h2, .titulo-secao > p,
-  .sobre .sobretitulo, .sobre h2, .sobre p:last-child,
+  .sobre,
   .contato .sobretitulo, .contato h2, .contato .botao-principal,
   .servico
 `);

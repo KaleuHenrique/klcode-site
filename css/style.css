@@ -491,34 +491,7 @@ nav a:hover::after {
   touch-action: pan-y;
 }
 
-.navegar-servicos {
-  position: absolute;
-  z-index: 7;
-  top: 50%;
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 50%;
-  background: rgba(11, 19, 32, 0.94);
-  color: var(--amarelo);
-  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.38);
-  font-size: 1.5rem;
-  line-height: 1;
-  transform: translateY(-50%);
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-.navegar-servicos.anterior { left: 12px; }
-.navegar-servicos.proximo { right: 12px; }
-
-.navegar-servicos:hover {
-  background: var(--amarelo);
-  color: var(--texto-em-destaque);
-  transform: translateY(-50%) scale(1.06);
-}
+.dica-servicos { display: none; }
 
 .servico {
   display: flex;
@@ -545,6 +518,11 @@ nav a:hover::after {
 .servico.servico-ativo {
   border-color: rgba(247, 199, 101, 0.46);
   box-shadow: 0 22px 46px rgba(2, 6, 23, 0.46), 0 0 45px rgba(247, 199, 101, 0.1);
+}
+
+.servico.servico-oculto {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .imagem-servico {
@@ -675,8 +653,14 @@ nav a:hover::after {
   padding-top: 15px;
 }
 
-.sobre p:last-child {
+.sobre h2 {
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+.sobre > p:not(.sobretitulo) {
   max-width: 610px;
+  margin-bottom: 20px;
   color: var(--texto);
   font-size: 1.1rem;
   line-height: 1.65;
@@ -1163,12 +1147,20 @@ textarea { resize: vertical; }
 
   .secao { padding: 75px 28px; }
 
+  .dica-servicos {
+    display: block;
+    margin: 0 22px 16px;
+    color: var(--texto);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
   .grade-servicos {
     min-height: 390px;
   }
 
   .servico { top: 18px; width: min(340px, calc(100% - 52px)); min-height: 340px; padding: 26px; }
-  .navegar-servicos { width: 44px; height: 44px; font-size: 1.2rem; }
   .sobre { margin: 0; }
 
   .contato { padding: 55px 28px; }
